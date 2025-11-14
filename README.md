@@ -45,7 +45,7 @@ flags.setConfig({
 });
 
 // Identify a user
-flags.indenify("user123", { plan: "premium", region: "us" });
+flags.identify("user123", { plan: "premium", region: "us" });
 
 // Check if a flag is enabled
 if (flags.isEnabled("newFeature")) {
@@ -149,12 +149,12 @@ flags.setConfig({
 });
 ```
 
-##### `indenify(id: UserId, properties?: Properties)`
+##### `identify(id: UserId, properties?: Properties)`
 
 Identifies the current user and re-evaluates flags.
 
 ```typescript
-flags.indenify("user123", { plan: "premium", region: "us" });
+flags.identify("user123", { plan: "premium", region: "us" });
 ```
 
 ##### `isEnabled(flag: TFlagName): boolean`
@@ -239,7 +239,7 @@ Matchers use OR logic - if any matcher matches, the flag is enabled.
 ```typescript
 const flags = new FlareFlags({ featureA: false });
 
-flags.indenify("user123");
+flags.identify("user123");
 
 flags.setConfig({
   cohorts: {},
@@ -256,7 +256,7 @@ flags.isEnabled("featureA"); // true (user123 matches)
 ```typescript
 const flags = new FlareFlags({ featureA: false });
 
-flags.indenify("user123", { plan: "premium", region: "us" });
+flags.identify("user123", { plan: "premium", region: "us" });
 
 flags.setConfig({
   cohorts: {},
@@ -273,7 +273,7 @@ flags.isEnabled("featureA"); // true (plan matches)
 ```typescript
 const flags = new FlareFlags({ featureA: false });
 
-flags.indenify("user123", { plan: "premium" });
+flags.identify("user123", { plan: "premium" });
 
 flags.setConfig({
   cohorts: {

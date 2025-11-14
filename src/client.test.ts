@@ -63,7 +63,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123");
+      flags.identify("user123");
 
       const config: Config = {
         cohorts: {},
@@ -81,7 +81,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", { plan: "premium", region: "us" });
+      flags.identify("user123", { plan: "premium", region: "us" });
 
       const config: Config = {
         cohorts: {},
@@ -125,7 +125,7 @@ describe("FlareFlags", () => {
         featureC: true,
       });
 
-      flags.indenify("user123", { plan: "premium" });
+      flags.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {},
@@ -143,7 +143,7 @@ describe("FlareFlags", () => {
     });
   });
 
-  describe("indenify", () => {
+  describe("identify", () => {
     it("should set user ID and re-evaluate flags", () => {
       const flags = new FlareFlags({
         featureA: false,
@@ -159,7 +159,7 @@ describe("FlareFlags", () => {
       flags.setConfig(config);
       expect(flags.isEnabled("featureA")).toBe(false);
 
-      flags.indenify("user123");
+      flags.identify("user123");
       expect(flags.isEnabled("featureA")).toBe(true);
     });
 
@@ -178,7 +178,7 @@ describe("FlareFlags", () => {
       flags.setConfig(config);
       expect(flags.isEnabled("featureA")).toBe(false);
 
-      flags.indenify("user123", { plan: "premium" });
+      flags.identify("user123", { plan: "premium" });
       expect(flags.isEnabled("featureA")).toBe(true);
     });
 
@@ -187,7 +187,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", {
+      flags.identify("user123", {
         plan: "premium",
         region: "us",
         beta: true,
@@ -209,7 +209,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", { plan: "basic" });
+      flags.identify("user123", { plan: "basic" });
 
       const config: Config = {
         cohorts: {},
@@ -227,7 +227,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", { plan: "premium", region: "us" });
+      flags.identify("user123", { plan: "premium", region: "us" });
 
       const config: Config = {
         cohorts: {},
@@ -245,7 +245,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", { plan: "premium" });
+      flags.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {},
@@ -265,7 +265,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123");
+      flags.identify("user123");
 
       const config: Config = {
         cohorts: {
@@ -285,7 +285,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", { plan: "premium" });
+      flags.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {
@@ -306,7 +306,7 @@ describe("FlareFlags", () => {
         featureB: false,
       });
 
-      flags.indenify("user123", { plan: "premium" });
+      flags.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {
@@ -329,7 +329,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user456");
+      flags.identify("user456");
 
       const config: Config = {
         cohorts: {
@@ -351,7 +351,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123");
+      flags.identify("user123");
 
       const config: Config = {
         cohorts: {},
@@ -369,7 +369,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", { plan: "premium" });
+      flags.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {},
@@ -387,7 +387,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", { plan: "basic" });
+      flags.identify("user123", { plan: "basic" });
 
       const config: Config = {
         cohorts: {},
@@ -503,7 +503,7 @@ describe("FlareFlags", () => {
         callCount++;
       });
 
-      flags.indenify("user123");
+      flags.identify("user123");
       expect(callCount).toBe(1);
     });
 
@@ -549,7 +549,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123");
+      flags.identify("user123");
 
       const config: Config = {
         cohorts: {},
@@ -567,7 +567,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123");
+      flags.identify("user123");
 
       const config: Config = {
         cohorts: {},
@@ -585,7 +585,7 @@ describe("FlareFlags", () => {
         featureA: false,
       });
 
-      flags.indenify("user123", {
+      flags.identify("user123", {
         age: 25,
         active: true,
         score: 100,

@@ -44,7 +44,7 @@ export class FlareFlags<TFlagName extends string> {
     this.#evalFlags();
   }
 
-  indenify(id: UserId, properties?: Properties) {
+  identify(id: UserId, properties?: Properties) {
     this.#user = { id, ...properties };
     this.#evalFlags();
   }
