@@ -1,6 +1,6 @@
 # flare-flags
 
-A lightweight feature flag library for TypeScript/JavaScript applications with support for user targeting, cohorts, and React integration.
+A lightweight feature flag library for TypeScript applications with support for user targeting, cohorts, and React integration. Designed for Cloudflare Workers.
 
 ## Features
 
@@ -14,7 +14,7 @@ A lightweight feature flag library for TypeScript/JavaScript applications with s
 ## Installation
 
 ```bash
-bun install
+bun add flare-flags
 ```
 
 ## Basic Usage
@@ -23,70 +23,52 @@ bun install
 
 ```typescript
 import { FlareFlags } from "flare-flags";
-// or
-// import { FlareFlags } from "flare-flags/client";
 
 // Initialize with default flag values
-const flags = new FlareFlags({
+const ff = new FlareFlags({
   newFeature: false,
   betaFeature: false,
 });
 
 // Set configuration
-flags.setConfig({
-  cohorts: {
-    beta: ["user123", "user456"],
-    premium: [{ plan: "premium" }],
-  },
-  flags: {
-    newFeature: [true], // Enabled for everyone
-    betaFeature: [false, "user123", "__cohort__beta"], // Enabled for user123 or beta cohort
-  },
-});
+const config = await fetchConfig();
+
+ff.setConfig(config);
 
 // Identify a user
-flags.identify("user123", { plan: "premium", region: "us" });
+ff.identify("user123", { plan: "premium", region: "us" });
 
 // Check if a flag is enabled
-if (flags.isEnabled("newFeature")) {
+if (ff.isEnabled("newFeature")) {
   // Show new feature
 }
-
-// Subscribe to flag changes
-const unsubscribe = flags.subscribe(() => {
-  // Re-render or update UI
-});
 ```
 
 ### React Integration
 
 ```tsx
 import React from "react";
-import { FlareFlagsProvider, useFlareFlags } from "flare-flags/react";
+import {
+  FlareFlagsProvider,
+  createFlareFlagsIsEnabledHook,
+} from "flare-flags/react";
 
-const flags = new FlareFlags({
-  newFeature: false,
-});
-
-flags.setConfig({
-  cohorts: {},
-  flags: {
-    newFeature: [true],
-  },
-});
+const ff = new FlareFlags({ newFeature: false });
+ff.setConfig(config);
+const useIsEnabled = createFlareFlagsIsEnabledHook<typeof ff>();
 
 function App() {
   return (
-    <FlareFlagsProvider value={flags}>
+    <FlareFlagsProvider value={ff}>
       <MyComponent />
     </FlareFlagsProvider>
   );
 }
 
 function MyComponent() {
-  const isEnabled = useFlareFlags();
+  const isEnabled = useIsEnabled("newFeature");
 
-  if (isEnabled("newFeature")) {
+  if (isEnabled) {
     return <div>New feature is enabled!</div>;
   }
 
@@ -99,22 +81,7 @@ function MyComponent() {
 ```typescript
 import { getConfig, setConfig } from "flare-flags/worker";
 
-export default {
-  async fetch(request: Request, env: { FLAGS: KVNamespace }) {
-    // Get current configuration
-    const config = await getConfig(env.FLAGS);
-
-    // Update configuration
-    await setConfig(env.FLAGS, {
-      cohorts: {},
-      flags: {
-        newFeature: [true],
-      },
-    });
-
-    return new Response("OK");
-  },
-};
+const config = await getConfig(env.FLAGS);
 ```
 
 ## API Reference
@@ -138,15 +105,7 @@ Creates a new FlareFlags instance with default flag values.
 Updates the flag configuration and re-evaluates all flags.
 
 ```typescript
-flags.setConfig({
-  cohorts: {
-    beta: ["user123"],
-  },
-  flags: {
-    featureA: [true],
-    featureB: [false, "user123"],
-  },
-});
+ff.setConfig(config);
 ```
 
 ##### `identify(id: UserId, properties?: Properties)`
@@ -154,7 +113,7 @@ flags.setConfig({
 Identifies the current user and re-evaluates flags.
 
 ```typescript
-flags.identify("user123", { plan: "premium", region: "us" });
+ff.identify("user123", { plan: "premium", region: "us" });
 ```
 
 ##### `isEnabled(flag: TFlagName): boolean`
@@ -162,7 +121,7 @@ flags.identify("user123", { plan: "premium", region: "us" });
 Checks if a flag is enabled for the current user.
 
 ```typescript
-const enabled = flags.isEnabled("newFeature");
+const enabled = ff.isEnabled("newFeature");
 ```
 
 ##### `subscribe(listener: () => void): () => void`
@@ -170,7 +129,7 @@ const enabled = flags.isEnabled("newFeature");
 Subscribes to flag changes. Returns an unsubscribe function.
 
 ```typescript
-const unsubscribe = flags.subscribe(() => {
+const unsubscribe = ff.subscribe(() => {
   console.log("Flags changed!");
 });
 ```
@@ -237,55 +196,40 @@ Matchers use OR logic - if any matcher matches, the flag is enabled.
 ### Targeting by User ID
 
 ```typescript
-const flags = new FlareFlags({ featureA: false });
+const ff = new FlareFlags({ featureA: false });
 
-flags.identify("user123");
+ff.identify("user123");
 
-flags.setConfig({
-  cohorts: {},
-  flags: {
-    featureA: [false, "user123", "user456"],
-  },
-});
+ff.setConfig(config);
 
-flags.isEnabled("featureA"); // true (user123 matches)
+ff.isEnabled("featureA"); // true (user123 matches)
 ```
 
 ### Targeting by Properties
 
 ```typescript
-const flags = new FlareFlags({ featureA: false });
+const ff = new FlareFlags({ featureA: false });
 
-flags.identify("user123", { plan: "premium", region: "us" });
+ff.identify("user123", { plan: "premium", region: "us" });
 
-flags.setConfig({
-  cohorts: {},
-  flags: {
-    featureA: [false, { plan: "premium" }],
-  },
-});
+ff.setConfig(config);
 
-flags.isEnabled("featureA"); // true (plan matches)
+ff.isEnabled("featureA"); // true (plan matches)
 ```
 
 ### Using Cohorts
 
 ```typescript
-const flags = new FlareFlags({ featureA: false });
+const ff = new FlareFlags({ featureA: false });
 
-flags.identify("user123", { plan: "premium" });
+ff.identify("user123", { plan: "premium" });
 
-flags.setConfig({
-  cohorts: {
-    beta: ["user123"],
-    premium: [{ plan: "premium" }],
-  },
-  flags: {
+ff.setConfig(config {
     featureA: [false, "__cohort__beta", "__cohort__premium"],
   },
 });
 
-flags.isEnabled("featureA"); // true (user123 is in both cohorts)
+ff.isEnabled("featureA"); // true (user123 is in both cohorts)
 ```
 
 ### React Hook Example
@@ -321,21 +265,6 @@ The test suite includes comprehensive coverage of:
 - Matcher logic (user IDs, properties, cohorts)
 - Listener subscriptions
 - Edge cases
-
-## TypeScript Support
-
-The library is fully typed and provides type inference:
-
-```typescript
-const flags = new FlareFlags({
-  featureA: false,
-  featureB: true,
-});
-
-// TypeScript knows the exact flag names
-flags.isEnabled("featureA"); // ✅
-flags.isEnabled("unknown"); // ❌ Type error
-```
 
 ## License
 
