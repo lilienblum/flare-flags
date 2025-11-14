@@ -1,17 +1,22 @@
 {
   "name": "flare-flags",
   "version": "1.0.2",
-  "description": "A lightweight feature flag library for TypeScript/JavaScript applications with support for user targeting, cohorts, and React integration",
+  "description": "A lightweight feature flag library for TypeScript with user targeting, cohorts, and React integration. Designed for Cloudflare Workers.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
     "./worker": "./src/worker.ts",
-    "./react": "./src/react.tsx"
+    "./react": "./src/react.ts"
   },
   "files": [
-    "src",
+    "src/client.ts",
+    "src/constants.ts",
+    "src/index.ts",
+    "src/react.ts",
+    "src/types.ts",
+    "src/worker.ts",
     "README.md",
     "LICENSE"
   ],
@@ -21,8 +26,6 @@
     "flags",
     "cohorts",
     "user-targeting",
-    "react",
-    "typescript",
     "cloudflare-workers"
   ],
   "license": "MIT",
@@ -31,7 +34,7 @@
     "url": "https://github.com/dan/flare-flags.git"
   },
   "scripts": {
-    "test": "bun test"
+    "prepublish": "bun test"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "latest",

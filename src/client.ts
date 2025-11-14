@@ -1,5 +1,12 @@
 import { COHORT_PROPERTY_PREFIX, DEFAULT_CONFIG } from "./constants";
-import type { CohortName, Config, Matchers, UserId, Properties } from "./types";
+import type {
+  CohortName,
+  Config,
+  Matchers,
+  UserId,
+  Properties,
+  FlagName,
+} from "./types";
 
 interface User extends Properties {
   id: UserId;
@@ -15,9 +22,7 @@ const matchUser = (
   matchers.some((m) => {
     if (typeof m === "string") {
       if (m.startsWith(COHORT_PROPERTY_PREFIX)) {
-        return cohorts.has(
-          m.slice(COHORT_PROPERTY_PREFIX.length) as CohortName
-        );
+        return cohorts.has(m.slice(COHORT_PROPERTY_PREFIX.length));
       }
       return m === user.id;
     }
@@ -29,14 +34,16 @@ const matchUser = (
     }
   });
 
-export class FlareFlags<TFlagName extends string> {
+export class FlareFlags<TFlagName extends FlagName> {
+  readonly #defaultValues: Readonly<Record<TFlagName, boolean>>;
   #config: Config = DEFAULT_CONFIG;
   #user: User | undefined;
-  #flags: Record<TFlagName, boolean>;
+  #evalFlagValues: Record<TFlagName, boolean>;
   #listeners = new Set<Listener>();
 
-  constructor(private readonly flagsDefaults: Record<TFlagName, boolean>) {
-    this.#flags = { ...flagsDefaults };
+  constructor(defaultValues: Record<TFlagName, boolean>) {
+    this.#defaultValues = Object.freeze(defaultValues);
+    this.#evalFlagValues = { ...defaultValues };
   }
 
   setConfig(config: Config) {
@@ -50,12 +57,32 @@ export class FlareFlags<TFlagName extends string> {
   }
 
   isEnabled(flag: TFlagName): boolean {
-    return this.#flags[flag] ?? false;
+    return this.#evalFlagValues[flag] ?? false;
   }
 
   subscribe(listener: Listener) {
     this.#listeners.add(listener);
     return () => this.#listeners.delete(listener);
+  }
+
+  reset() {
+    this.#user = undefined;
+    this.#resetEvalFlagValues();
+  }
+
+  #resetEvalFlagValues() {
+    let isChanged = false;
+    for (const flagName in this.#defaultValues) {
+      const prevValue = this.#evalFlagValues[flagName];
+      const defaultValue = this.#defaultValues[flagName];
+      if (prevValue !== defaultValue) {
+        this.#evalFlagValues[flagName] = defaultValue;
+        isChanged = true;
+      }
+    }
+    if (isChanged) {
+      this.#notifyListeners();
+    }
   }
 
   #notifyListeners() {
@@ -65,17 +92,8 @@ export class FlareFlags<TFlagName extends string> {
   }
 
   #evalFlags() {
-    let flagsChanged = false;
-
     if (!this.#config) {
-      const newFlags = { ...this.flagsDefaults };
-      flagsChanged = Object.entries(this.#flags).some(
-        ([flagName, value]) => newFlags[flagName as TFlagName] !== value
-      );
-      if (flagsChanged) {
-        this.#flags = newFlags;
-        this.#notifyListeners();
-      }
+      this.#resetEvalFlagValues();
       return;
     }
 
@@ -89,28 +107,29 @@ export class FlareFlags<TFlagName extends string> {
         }
       }
     }
-    for (const flagName in this.flagsDefaults) {
+    let isChanged = false;
+    for (const flagName in this.#defaultValues) {
       const flagConfig = this.#config.flags[flagName];
-      const defaultFlagValue = this.flagsDefaults[flagName];
+      const defaultFlagValue = this.#defaultValues[flagName];
       if (!flagConfig) {
-        flagsChanged =
-          flagsChanged || this.#flags[flagName] !== defaultFlagValue;
-        this.#flags[flagName] = defaultFlagValue;
+        isChanged =
+          isChanged || this.#evalFlagValues[flagName] !== defaultFlagValue;
+        this.#evalFlagValues[flagName] = defaultFlagValue;
         continue;
       }
       const [isEnabled, ...matchers] = flagConfig;
       if (isEnabled) {
-        flagsChanged = flagsChanged || this.#flags[flagName] !== true;
-        this.#flags[flagName] = true;
+        isChanged = isChanged || this.#evalFlagValues[flagName] !== true;
+        this.#evalFlagValues[flagName] = true;
         continue;
       }
       const isMatched = user
         ? matchUser(user, matchers, matchedCohorts)
         : false;
-      flagsChanged = flagsChanged || this.#flags[flagName] !== isMatched;
-      this.#flags[flagName] = isMatched;
+      isChanged = isChanged || this.#evalFlagValues[flagName] !== isMatched;
+      this.#evalFlagValues[flagName] = isMatched;
     }
-    if (flagsChanged) {
+    if (isChanged) {
       this.#notifyListeners();
     }
   }

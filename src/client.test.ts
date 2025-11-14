@@ -6,44 +6,44 @@ import { COHORT_PROPERTY_PREFIX } from "./constants";
 describe("FlareFlags", () => {
   describe("constructor", () => {
     test("should initialize with default flag values", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
         featureB: true,
       });
 
-      expect(flags.isEnabled("featureA")).toBe(false);
-      expect(flags.isEnabled("featureB")).toBe(true);
+      expect(ff.isEnabled("featureA")).toBe(false);
+      expect(ff.isEnabled("featureB")).toBe(true);
     });
 
     test("should handle empty flags object", () => {
-      const flags = new FlareFlags({} as Record<string, boolean>);
-      expect(flags.isEnabled("nonexistent")).toBe(false);
+      const ff = new FlareFlags({} as Record<string, boolean>);
+      expect(ff.isEnabled("nonexistent")).toBe(false);
     });
   });
 
   describe("isEnabled", () => {
     test("should return default value when no config is set", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: true,
         featureB: false,
       });
 
-      expect(flags.isEnabled("featureA")).toBe(true);
-      expect(flags.isEnabled("featureB")).toBe(false);
+      expect(ff.isEnabled("featureA")).toBe(true);
+      expect(ff.isEnabled("featureB")).toBe(false);
     });
 
     test("should return false for unknown flags", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: true,
       });
 
-      expect(flags.isEnabled("unknown" as any)).toBe(false);
+      expect(ff.isEnabled("unknown" as any)).toBe(false);
     });
   });
 
   describe("setConfig", () => {
     test("should update flags based on config with enabled flag", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
@@ -54,16 +54,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should update flags based on config with disabled flag and user ID matcher", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123");
+      ff.identify("user123");
 
       const config: Config = {
         cohorts: {},
@@ -72,16 +72,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should update flags based on config with disabled flag and property matcher", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", { plan: "premium", region: "us" });
+      ff.identify("user123", { plan: "premium", region: "us" });
 
       const config: Config = {
         cohorts: {},
@@ -90,12 +90,12 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should revert to default when flag config is removed", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: true,
       });
 
@@ -106,26 +106,26 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config1);
-      expect(flags.isEnabled("featureA")).toBe(false);
+      ff.setConfig(config1);
+      expect(ff.isEnabled("featureA")).toBe(false);
 
       const config2: Config = {
         cohorts: {},
         flags: {},
       };
 
-      flags.setConfig(config2);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config2);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should handle multiple flags independently", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
         featureB: false,
         featureC: true,
       });
 
-      flags.identify("user123", { plan: "premium" });
+      ff.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {},
@@ -136,16 +136,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
-      expect(flags.isEnabled("featureB")).toBe(true);
-      expect(flags.isEnabled("featureC")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+      expect(ff.isEnabled("featureB")).toBe(true);
+      expect(ff.isEnabled("featureC")).toBe(true);
     });
   });
 
   describe("identify", () => {
     test("should set user ID and re-evaluate flags", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
@@ -156,15 +156,15 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(false);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
 
-      flags.identify("user123");
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.identify("user123");
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should set user properties and re-evaluate flags", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
@@ -175,19 +175,19 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(false);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
 
-      flags.identify("user123", { plan: "premium" });
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.identify("user123", { plan: "premium" });
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should handle user with multiple properties", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", {
+      ff.identify("user123", {
         plan: "premium",
         region: "us",
         beta: true,
@@ -200,16 +200,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should not match when properties don't match exactly", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", { plan: "basic" });
+      ff.identify("user123", { plan: "basic" });
 
       const config: Config = {
         cohorts: {},
@@ -218,16 +218,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(false);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
     });
 
     test("should match when all properties match", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", { plan: "premium", region: "us" });
+      ff.identify("user123", { plan: "premium", region: "us" });
 
       const config: Config = {
         cohorts: {},
@@ -236,16 +236,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should not match when property matcher has extra properties", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", { plan: "premium" });
+      ff.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {},
@@ -254,18 +254,18 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(false);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
     });
   });
 
   describe("cohorts", () => {
     test("should match user to cohort by user ID", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123");
+      ff.identify("user123");
 
       const config: Config = {
         cohorts: {
@@ -276,16 +276,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should match user to cohort by properties", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", { plan: "premium" });
+      ff.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {
@@ -296,17 +296,17 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should match user to multiple cohorts", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
         featureB: false,
       });
 
-      flags.identify("user123", { plan: "premium" });
+      ff.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {
@@ -319,17 +319,17 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
-      expect(flags.isEnabled("featureB")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+      expect(ff.isEnabled("featureB")).toBe(true);
     });
 
     test("should not match when user is not in cohort", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user456");
+      ff.identify("user456");
 
       const config: Config = {
         cohorts: {
@@ -340,18 +340,18 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(false);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
     });
   });
 
   describe("matchers", () => {
     test("should match when any matcher matches (OR logic)", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123");
+      ff.identify("user123");
 
       const config: Config = {
         cohorts: {},
@@ -360,16 +360,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should match when any property matcher matches", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", { plan: "premium" });
+      ff.identify("user123", { plan: "premium" });
 
       const config: Config = {
         cohorts: {},
@@ -378,16 +378,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should not match when no matchers match", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", { plan: "basic" });
+      ff.identify("user123", { plan: "basic" });
 
       const config: Config = {
         cohorts: {},
@@ -396,19 +396,19 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(false);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
     });
   });
 
   describe("subscribe", () => {
     test("should call listener when flags change", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
       let callCount = 0;
-      flags.subscribe(() => {
+      ff.subscribe(() => {
         callCount++;
       });
 
@@ -421,22 +421,22 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
+      ff.setConfig(config);
       expect(callCount).toBe(1);
     });
 
     test("should call multiple listeners when flags change", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
       let callCount1 = 0;
       let callCount2 = 0;
 
-      flags.subscribe(() => {
+      ff.subscribe(() => {
         callCount1++;
       });
-      flags.subscribe(() => {
+      ff.subscribe(() => {
         callCount2++;
       });
 
@@ -447,18 +447,18 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
+      ff.setConfig(config);
       expect(callCount1).toBe(1);
       expect(callCount2).toBe(1);
     });
 
     test("should return unsubscribe function", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
       let callCount = 0;
-      const unsubscribe = flags.subscribe(() => {
+      const unsubscribe = ff.subscribe(() => {
         callCount++;
       });
 
@@ -469,12 +469,12 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
+      ff.setConfig(config);
       expect(callCount).toBe(1);
 
       unsubscribe();
 
-      flags.setConfig({
+      ff.setConfig({
         cohorts: {},
         flags: {
           featureA: [false],
@@ -485,7 +485,7 @@ describe("FlareFlags", () => {
     });
 
     test("should notify listeners when user is identified", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
@@ -496,24 +496,24 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
+      ff.setConfig(config);
 
       let callCount = 0;
-      flags.subscribe(() => {
+      ff.subscribe(() => {
         callCount++;
       });
 
-      flags.identify("user123");
+      ff.identify("user123");
       expect(callCount).toBe(1);
     });
 
     test("should not notify listeners when flags don't change", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
       let callCount = 0;
-      flags.subscribe(() => {
+      ff.subscribe(() => {
         callCount++;
       });
 
@@ -524,14 +524,14 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
+      ff.setConfig(config);
       expect(callCount).toBe(0); // No change from default false
     });
   });
 
   describe("edge cases", () => {
     test("should handle config with no flags", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: true,
       });
 
@@ -540,16 +540,16 @@ describe("FlareFlags", () => {
         flags: {},
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true); // Should use default
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true); // Should use default
     });
 
     test("should handle user without properties", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123");
+      ff.identify("user123");
 
       const config: Config = {
         cohorts: {},
@@ -558,16 +558,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should handle empty matchers array", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123");
+      ff.identify("user123");
 
       const config: Config = {
         cohorts: {},
@@ -576,16 +576,16 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(false);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
     });
 
     test("should handle numeric and boolean properties", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
-      flags.identify("user123", {
+      ff.identify("user123", {
         age: 25,
         active: true,
         score: 100,
@@ -598,12 +598,12 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
-      expect(flags.isEnabled("featureA")).toBe(true);
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
 
     test("should handle flag that doesn't exist in defaults", () => {
-      const flags = new FlareFlags({
+      const ff = new FlareFlags({
         featureA: false,
       });
 
@@ -614,9 +614,141 @@ describe("FlareFlags", () => {
         },
       };
 
-      flags.setConfig(config);
+      ff.setConfig(config);
       // featureB config is ignored since it's not in defaults
-      expect(flags.isEnabled("featureA")).toBe(false);
+      expect(ff.isEnabled("featureA")).toBe(false);
+    });
+  });
+
+  describe("reset", () => {
+    test("should reset user and revert flags to defaults", () => {
+      const ff = new FlareFlags({
+        featureA: false,
+        featureB: true,
+      });
+
+      ff.identify("user123", { plan: "premium" });
+
+      const config: Config = {
+        cohorts: {},
+        flags: {
+          featureA: [false, "user123"],
+          featureB: [true, { plan: "premium" }],
+        },
+      };
+
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+      expect(ff.isEnabled("featureB")).toBe(true);
+
+      ff.reset();
+      expect(ff.isEnabled("featureA")).toBe(false);
+      expect(ff.isEnabled("featureB")).toBe(true);
+    });
+
+    test("should notify listeners when reset changes flag values", () => {
+      const ff = new FlareFlags({
+        featureA: false,
+      });
+
+      ff.identify("user123");
+
+      const config: Config = {
+        cohorts: {},
+        flags: {
+          featureA: [false, "user123"],
+        },
+      };
+
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+
+      let callCount = 0;
+      ff.subscribe(() => {
+        callCount++;
+      });
+
+      ff.reset();
+      expect(callCount).toBe(1);
+      expect(ff.isEnabled("featureA")).toBe(false);
+    });
+
+    test("should not notify listeners when reset doesn't change flag values", () => {
+      const ff = new FlareFlags({
+        featureA: false,
+      });
+
+      const config: Config = {
+        cohorts: {},
+        flags: {
+          featureA: [false],
+        },
+      };
+
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
+
+      let callCount = 0;
+      ff.subscribe(() => {
+        callCount++;
+      });
+
+      ff.reset();
+      expect(callCount).toBe(0); // No change from default false
+      expect(ff.isEnabled("featureA")).toBe(false);
+    });
+
+    test("should reset user identification", () => {
+      const ff = new FlareFlags({
+        featureA: false,
+      });
+
+      ff.identify("user123", { plan: "premium" });
+
+      const config: Config = {
+        cohorts: {},
+        flags: {
+          featureA: [false, "user123"],
+        },
+      };
+
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+
+      ff.reset();
+
+      // After reset, user-specific flag should revert to default
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(false);
+    });
+
+    test("should reset multiple flags independently", () => {
+      const ff = new FlareFlags({
+        featureA: false,
+        featureB: false,
+        featureC: true,
+      });
+
+      ff.identify("user123", { plan: "premium" });
+
+      const config: Config = {
+        cohorts: {},
+        flags: {
+          featureA: [false, "user123"],
+          featureB: [false, { plan: "premium" }],
+          featureC: [true, "user123"],
+        },
+      };
+
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+      expect(ff.isEnabled("featureB")).toBe(true);
+      expect(ff.isEnabled("featureC")).toBe(true);
+
+      ff.reset();
+      expect(ff.isEnabled("featureA")).toBe(false);
+      expect(ff.isEnabled("featureB")).toBe(false);
+      expect(ff.isEnabled("featureC")).toBe(true);
     });
   });
 });
