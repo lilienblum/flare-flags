@@ -1,6 +1,6 @@
 {
   "name": "flare-flags",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A lightweight feature flag library for TypeScript with user targeting, cohorts, and React integration. Designed for Cloudflare Workers.",
   "type": "module",
   "main": "./src/index.ts",
