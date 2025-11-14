@@ -8,16 +8,16 @@ type ExtractFlagName<T> = T extends FlareFlags<infer TFlagName>
 
 const context = React.createContext<FlareFlags<any> | null>(null);
 
-export function createFlareFlagsIsEnabledHook<
-  TFlags extends FlareFlags<FlagName>
->() {
-  return (flagName: ExtractFlagName<TFlags>) => {
-    const flags = React.useContext(context);
-    if (!flags) {
-      throw new Error("FlareFlags context not found");
-    }
-    return flags.isEnabled(flagName);
-  };
+export function useIsFeatureEnabled<TFlags extends FlareFlags<FlagName>>(
+  flagName: ExtractFlagName<TFlags>
+) {
+  const ff = React.useContext(context);
+  if (!ff) {
+    throw new Error(
+      "useIsFeatureEnabled must be used within a FlareFlagsProvider"
+    );
+  }
+  return React.useSyncExternalStore(ff.subscribe, () => ff.isEnabled(flagName));
 }
 
 export function FlareFlagsProvider({
