@@ -32,29 +32,29 @@ export class FlareFlags<TFlagName extends FlagName> {
     this.#globalProperties = Object.freeze(globalProperties);
   }
 
-  setConfig(config: Config) {
+  setConfig = (config: Config) => {
     this.#config = config;
     this.#eval();
-  }
+  };
 
-  identify(id: UserId, properties?: Properties) {
+  identify = (id: UserId, properties?: Properties) => {
     this.#user = { id, ...properties };
     this.#eval();
-  }
+  };
 
-  isEnabled(flag: TFlagName): boolean {
+  isEnabled = (flag: TFlagName): boolean => {
     return this.#evalFlagValues[flag] ?? false;
-  }
+  };
 
-  subscribe(listener: Listener) {
+  subscribe = (listener: Listener) => {
     this.#listeners.add(listener);
     return () => this.#listeners.delete(listener);
-  }
+  };
 
-  reset() {
+  reset = () => {
     this.#user = undefined;
     this.#resetEvalFlagValues();
-  }
+  };
 
   #matchByUserOrGlobalProperties(props: Properties) {
     const entries = Object.entries(props);
