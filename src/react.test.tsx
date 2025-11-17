@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { createIsFeatureEnabledHook } from "./react";
+import { createUseIsFeatureEnabled } from "./react";
 import { FlareFlags } from "./client";
 import type { Config } from "./types";
 
@@ -10,7 +10,7 @@ describe("react", () => {
         featureA: false,
       });
 
-      const useIsEnabled = createIsFeatureEnabledHook(ff);
+      const useIsEnabled = createUseIsFeatureEnabled(ff);
       expect(typeof useIsEnabled).toBe("function");
     });
 
