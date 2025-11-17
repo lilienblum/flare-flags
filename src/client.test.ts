@@ -1,7 +1,7 @@
 import { describe, test, expect } from "bun:test";
 import { FlareFlags } from "./client";
 import type { Config } from "./types";
-import { COHORT_PROPERTY_PREFIX } from "./constants";
+import { PREFIX_COHORT } from "./constants";
 
 describe("FlareFlags", () => {
   describe("constructor", () => {
@@ -272,7 +272,7 @@ describe("FlareFlags", () => {
           beta: ["user123"],
         },
         flags: {
-          featureA: [false, `${COHORT_PROPERTY_PREFIX}beta`],
+          featureA: [false, `${PREFIX_COHORT}beta`],
         },
       };
 
@@ -292,7 +292,7 @@ describe("FlareFlags", () => {
           premium: [{ plan: "premium" }],
         },
         flags: {
-          featureA: [false, `${COHORT_PROPERTY_PREFIX}premium`],
+          featureA: [false, `${PREFIX_COHORT}premium`],
         },
       };
 
@@ -314,8 +314,8 @@ describe("FlareFlags", () => {
           premium: [{ plan: "premium" }],
         },
         flags: {
-          featureA: [false, `${COHORT_PROPERTY_PREFIX}beta`],
-          featureB: [false, `${COHORT_PROPERTY_PREFIX}premium`],
+          featureA: [false, `${PREFIX_COHORT}beta`],
+          featureB: [false, `${PREFIX_COHORT}premium`],
         },
       };
 
@@ -336,12 +336,82 @@ describe("FlareFlags", () => {
           beta: ["user123"],
         },
         flags: {
-          featureA: [false, `${COHORT_PROPERTY_PREFIX}beta`],
+          featureA: [false, `${PREFIX_COHORT}beta`],
         },
       };
 
       ff.setConfig(config);
       expect(ff.isEnabled("featureA")).toBe(false);
+    });
+
+    test("should handle cohorts that reference other cohorts", () => {
+      const ff = new FlareFlags({
+        featureA: false,
+      });
+
+      ff.identify("user123");
+
+      const config: Config = {
+        cohorts: {
+          beta: ["user123"],
+          vip: [`${PREFIX_COHORT}beta`],
+        },
+        flags: {
+          featureA: [false, `${PREFIX_COHORT}vip`],
+        },
+      };
+
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+    });
+
+    test("should handle cohorts that reference other cohorts in reverse order", () => {
+      const ff = new FlareFlags({
+        featureA: false,
+      });
+
+      ff.identify("user123");
+
+      // vip is defined before beta, but references beta
+      const config: Config = {
+        cohorts: {
+          vip: [`${PREFIX_COHORT}beta`],
+          beta: ["user123"],
+        },
+        flags: {
+          featureA: [false, `${PREFIX_COHORT}vip`],
+        },
+      };
+
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+    });
+
+    test("should handle mixed matchers in flags (user ID + property + cohort)", () => {
+      const ff = new FlareFlags({
+        featureA: false,
+      });
+
+      ff.identify("user123", { plan: "premium" });
+
+      const config: Config = {
+        cohorts: {
+          beta: ["user456"],
+          premium: [{ plan: "premium" }],
+        },
+        flags: {
+          featureA: [
+            false,
+            "user123",
+            { plan: "basic" },
+            `${PREFIX_COHORT}premium`,
+          ],
+        },
+      };
+
+      ff.setConfig(config);
+      // Should match because user ID matches
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
   });
 
@@ -617,6 +687,47 @@ describe("FlareFlags", () => {
       ff.setConfig(config);
       // featureB config is ignored since it's not in defaults
       expect(ff.isEnabled("featureA")).toBe(false);
+    });
+
+    test("should match using global properties", () => {
+      const ff = new FlareFlags(
+        {
+          featureA: false,
+        },
+        { environment: "production", region: "us" }
+      );
+
+      const config: Config = {
+        cohorts: {},
+        flags: {
+          featureA: [false, { environment: "production" }],
+        },
+      };
+
+      ff.setConfig(config);
+      expect(ff.isEnabled("featureA")).toBe(true);
+    });
+
+    test("should prefer user properties over global properties", () => {
+      const ff = new FlareFlags(
+        {
+          featureA: false,
+        },
+        { plan: "basic" }
+      );
+
+      ff.identify("user123", { plan: "premium" });
+
+      const config: Config = {
+        cohorts: {},
+        flags: {
+          featureA: [false, { plan: "premium" }],
+        },
+      };
+
+      ff.setConfig(config);
+      // Should match user properties (premium) not global (basic)
+      expect(ff.isEnabled("featureA")).toBe(true);
     });
   });
 
