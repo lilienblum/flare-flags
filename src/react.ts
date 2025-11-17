@@ -1,6 +1,6 @@
 import React from "react";
-import type { FlareFlags } from "./client";
-import type { FlagName } from "./types";
+import type { FlareFlags } from "./client.js";
+import type { FlagName } from "./types.js";
 
 type ExtractFlagName<T> = T extends FlareFlags<infer TFlagName>
   ? TFlagName

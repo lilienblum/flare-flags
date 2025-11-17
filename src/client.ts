@@ -1,4 +1,4 @@
-import { PREFIX_COHORT, DEFAULT_CONFIG } from "./constants";
+import { PREFIX_COHORT, DEFAULT_CONFIG } from "./constants.js";
 import type {
   CohortName,
   Config,
@@ -6,7 +6,7 @@ import type {
   UserId,
   Properties,
   FlagName,
-} from "./types";
+} from "./types.js";
 
 interface User extends Properties {
   id: UserId;

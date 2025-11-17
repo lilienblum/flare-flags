@@ -1,6 +1,6 @@
 import type { KVNamespace } from "@cloudflare/workers-types";
-import { DEFAULT_CONFIG } from "./constants";
-import type { Config } from "./types";
+import { DEFAULT_CONFIG } from "./constants.js";
+import type { Config } from "./types.js";
 export type { Config as FlareFlagsConfig };
 
 const KEY = "config";
