@@ -6,7 +6,7 @@ type ExtractFlagName<T> = T extends FlareFlags<infer TFlagName>
   ? TFlagName
   : never;
 
-export const createIsFeatureEnabledHook =
+export const createUseIsFeatureEnabled =
   <TFlags extends FlareFlags<FlagName>>(instance: FlareFlags<FlagName>) =>
   (flagName: ExtractFlagName<TFlags>) => {
     return React.useSyncExternalStore(instance.subscribe, () =>
