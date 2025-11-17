@@ -9,7 +9,10 @@ type ExtractFlagName<T> = T extends FlareFlags<infer TFlagName>
 export const createUseIsFeatureEnabled =
   <TFlags extends FlareFlags<FlagName>>(instance: FlareFlags<FlagName>) =>
   (flagName: ExtractFlagName<TFlags>) => {
-    return React.useSyncExternalStore(instance.subscribe, () =>
-      instance.isEnabled(flagName)
+    const getSnapshot = () => instance.isEnabled(flagName);
+    return React.useSyncExternalStore(
+      instance.subscribe,
+      getSnapshot,
+      getSnapshot
     );
   };
