@@ -40,7 +40,6 @@
     "prepublishOnly": "bun test && bun run build"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "latest",
     "@types/bun": "latest",
     "react": "^19.2.0",
     "typescript": "^5"

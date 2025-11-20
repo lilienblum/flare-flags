@@ -7,8 +7,21 @@ import { DEFAULT_CONFIG } from "./constants";
 class MockKVNamespace {
   private store = new Map<string, string>();
 
-  async get(key: string): Promise<string | null> {
-    return this.store.get(key) ?? null;
+  async get<T>(
+    key: string,
+    options?: {
+      type: "json";
+      cacheTtl?: number;
+    }
+  ): Promise<T | string | null> {
+    const value = this.store.get(key);
+    if (value === undefined) {
+      return null;
+    }
+    if (options?.type === "json") {
+      return JSON.parse(value) as T;
+    }
+    return value;
   }
 
   async put(key: string, value: string): Promise<void> {
@@ -104,7 +117,7 @@ describe("worker", () => {
       };
 
       await setConfig(kv as any, testConfig);
-      const stored = await kv.get("config");
+      const stored = await kv.get<string>("config");
       expect(stored).toBe(JSON.stringify(testConfig));
     });
 
@@ -128,7 +141,7 @@ describe("worker", () => {
       await setConfig(kv as any, config1);
       await setConfig(kv as any, config2);
 
-      const stored = await kv.get("config");
+      const stored = await kv.get<string>("config");
       expect(stored).toBe(JSON.stringify(config2));
     });
 
@@ -139,7 +152,7 @@ describe("worker", () => {
       };
 
       await setConfig(kv as any, emptyConfig);
-      const stored = await kv.get("config");
+      const stored = await kv.get<string>("config");
       expect(stored).toBe(JSON.stringify(emptyConfig));
     });
 
@@ -158,7 +171,7 @@ describe("worker", () => {
       };
 
       await setConfig(kv as any, complexConfig);
-      const stored = await kv.get("config");
+      const stored = await kv.get<string>("config");
       const parsed = JSON.parse(stored!);
       expect(parsed).toEqual(complexConfig);
     });
